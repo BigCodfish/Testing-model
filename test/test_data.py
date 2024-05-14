@@ -1,13 +1,15 @@
 import numpy as np
 
-from datautils.data_transformer import mask_data, SpanInfo
+from datautils.data_transformer import SpanInfo
+from utils.utils import generate_mask_mix
 
 
 def _test_data_mask():
     data = np.ones([10, 10])
     info_list = [[SpanInfo(dim=2, activation_fn=''), SpanInfo(dim=1, activation_fn='')],
                  [SpanInfo(dim=3, activation_fn=''), SpanInfo(dim=4, activation_fn='')]]
-    masked = mask_data(data, info_list, mask_rate=0.5)
+    mask = generate_mask_mix(info_list=info_list, batch_size=len(data), mask_rate=0.5)
+    masked = data * mask
     print(data)
     print(masked)
     t = data-masked

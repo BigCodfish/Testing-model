@@ -24,25 +24,6 @@ def load_data(name, path=data_path):
     return data
 
 
-def mask_data(raw_data, info_list, batch_size=None, mask_rate=0.8):
-    if batch_size is None:
-        batch_size = len(raw_data)
-
-    dims = []
-    for info in info_list:
-        for i in info:
-            dims.append(i.dim)
-    n = len(dims)
-    raw_mask = utils.generate_mask([batch_size, n], mask_rate)
-    mask = np.zeros([batch_size, sum(dims)])
-    st = 0
-    for i in range(n):
-        for j in range(dims[i]):
-            mask[:, st + j] = raw_mask[:, i]
-        st += dims[i]
-    return raw_data * mask
-
-
 def read_csv(filename, meta_filename=None, header=True, discrete=None):
     filename = os.path.join(data_path, filename)
     meta_filename = os.path.join(data_path, meta_filename)

@@ -11,6 +11,22 @@ LayerConfig = namedtuple("LayerConfig",
 NetConfig = namedtuple('Netconfig', ['type', 'layers', 'optim', 'loss'])
 
 
+def build_net(config, output_info_list, device='cuda'):
+    if config.type == 'MixDataNet':
+        return MixDataNet(config=config, output_info_list=output_info_list).to(device)
+    elif config.type == 'MLP':
+        return MLP(config=config, output_info_list=output_info_list).to(device)
+    else:
+        raise ValueError(f'未知的网络类型：{config.type}')
+
+
+def build_trainer(config, net):
+    if config.optim == 'Adam':
+        return torch.optim.Adam(net.parameters())
+    else:
+        raise ValueError(f'未知的优化器类型{config.optim}')
+
+
 class BaseModule(nn.Module):
     def __init__(self, param_file_name):
         super().__init__()
@@ -31,6 +47,7 @@ class BaseModule(nn.Module):
         path = os.path.join(param_path, param_file_name)
         torch.save(self.state_dict(), path)
 
+
 class MLP(BaseModule):
     def __init__(self, config, output_info_list, param_file_name='default'):
         super().__init__(param_file_name)
@@ -47,7 +64,7 @@ class MLP(BaseModule):
 
     def forward(self, data):
         data = self.seq(data)
-        data = self._activate(data)
+        # data = self._activate(data)
         return data
 
     def _activate(self, data):
