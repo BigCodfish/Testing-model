@@ -36,13 +36,15 @@ def draw_sub(ys, x=None):
     fig, ax = plt.subplots(2, 2)
     fig.set_size_inches(12, 8)
     ax[0][0].set_title('loss of g&d')
-    ax[1][0].set_title('w_distance')
-    ax[1][1].set_title('loss test')
+    ax[0][1].set_title('w_distance')
+    ax[1][0].set_title('loss test')
+    ax[1][1].set_title('acc')
 
     ax[0][0].plot(x, ys[0])
     ax[0][0].plot(x, ys[1])
-    ax[1][0].plot(x, ys[2])
-    ax[1][1].plot(x, ys[3])
+    ax[0][1].plot(x, ys[2])
+    ax[1][0].plot(x, ys[3])
+    ax[1][1].plot(x, ys[4])
 
     ax[0][0].legend(['loss_g', 'loss_d'])
 

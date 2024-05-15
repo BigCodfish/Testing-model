@@ -49,8 +49,12 @@ def d_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator):
 def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=False, batch_size=128, num_epochs=100,
           hint_rate=0.9):
     mask = generate_mask_mix(info_list=output_info_list, batch_size=len(data), mask_rate=0.2)
-    data = data * mask
     train_data, test_data, train_mask, test_mask = dp.cross_validation(data, mask, True, 0.2)
+
+    evaluator = Evaluator(data=test_data, mask=test_mask, output_info_list=output_info_list)
+
+    train_data *= train_mask
+    test_data *= test_mask
     train_n, test_n = len(train_data), len(test_data)
     print(f"训练样本数量：{train_n}, 测试样本数量：{test_n}")
     dim = data.shape[-1]
@@ -62,12 +66,11 @@ def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=Fal
     trainer_g = build_trainer(config_g, generator)
     trainer_d = build_trainer(config_d, discriminator)
 
-    evaluator = Evaluator(data=test_data, mask=test_mask, output_info_list=output_info_list)
-
     loss_g_list = []
     loss_d_list = []
     w_distances = []
     loss_test = []
+    acc_list = []
     iterator = tqdm(range(num_epochs))
     for epoch in iterator:
         # 采样训练数据
@@ -111,6 +114,8 @@ def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=Fal
             loss_d_list.append(loss_d.item())
             w_distances.append(w_distance.item())
             t = evaluator.test(data_sampler, generator, use_cond=use_cond)
+            acc = evaluator.get_accuracy(generator=generator)
+            acc_list.append(acc)
             loss_test.append(t.item())
 
-    return loss_g_list, loss_d_list, w_distances, loss_test
+    return loss_g_list, loss_d_list, w_distances, loss_test, acc_list

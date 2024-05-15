@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from numpy import argmax
 
@@ -6,9 +7,23 @@ from utils import utils
 
 class Evaluator():
     def __init__(self, data, mask, output_info_list, device='cuda'):
+        st, ed, missing_count = 0, 0, 0
+        for column_info in output_info_list:
+            if len(column_info) > 1:
+                st += 1
+                ed = st
+            info = column_info[-1]
+            ed += info.dim
+            missing_count += np.count_nonzero(mask[:, st] == 0)
+        self.missing_count = missing_count
+        print(f'missing count:{self.missing_count}\n, '
+              f'total feature count:{15 * len(data)}\n, '
+              f'比例：{missing_count / (15 * len(data))}')
+
         data = torch.tensor(data, dtype=torch.float32, device=device)
         mask = torch.tensor(mask, dtype=torch.float32, device=device)
-        self.data = data
+        self.raw_data = data.cpu()
+        self.data = data * mask
         self.mask = mask
         self.output_info_list = output_info_list
 
@@ -32,26 +47,18 @@ class Evaluator():
         input_data = torch.concat(dim=1, tensors=[self.data, self.mask])
         imputed_data = generator(input_data)
         imputed_data = self.data * self.mask + imputed_data * (1-self.mask)
-        n = len(self.data)
-        missing_count = 0
         acc_count = 0
-        for i in range(n):
-            start, end = 0, 0
-            for column_info in self.output_info_list:
-                if len(column_info) > 1:
-                    start += (column_info[1].dim + 1)
-                    end = start
-                    continue
-                for info in column_info:
-                    end += info.dim
-                    if self.mask[i, start] == 0:
-                        missing_count += 1
-                        v, t = torch.max(imputed_data[i, start:end])
-                        if v == 1:
-                            acc_count += 1
-                    start = end
-        print(f'离散数据缺失数：{missing_count}'
-              f'离散数据预测准确率：{acc_count/missing_count}')
+        start, end = 0, 0
+        for column_info in self.output_info_list:
+            if len(column_info) > 1:
+                # 跳过一个连续变量
+                start += 1
+                end = start
 
-
-
+            info = column_info[-1]
+            end += info.dim
+            v = imputed_data[:, start:end].argmax(axis=1).cpu()
+            temp = self.raw_data[np.arange(len(self.data)), v+start] * (1 - self.mask[:, start]).cpu()
+            acc_count += np.count_nonzero(temp == 1)
+            start = end
+        return acc_count/self.missing_count

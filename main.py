@@ -23,9 +23,9 @@ def run_train():
     config_g = NetConfig(type='MLP', layers=layers, optim='Adam', loss='GAIN')
     config_d = NetConfig(type='MLP', layers=layers, optim='Adam', loss='wasserstein')
 
-    loss_g, loss_d, w_distance, loss_test = train.train(data, config_g, config_d, output_info_list, data_sampler,
+    loss_g, loss_d, w_distance, loss_test, acc = train.train(data, config_g, config_d, output_info_list, data_sampler,
                                                      batch_size=128, num_epochs=500)
 
-    painter.draw_sub([loss_g, loss_d, w_distance, loss_test])
+    painter.draw_sub([loss_g, loss_d, w_distance, loss_test, acc])
 
 run_train()
