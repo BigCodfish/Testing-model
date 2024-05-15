@@ -1,5 +1,10 @@
-import numpy as np
+import os
 
+import numpy as np
+import pandas as pd
+
+result_path = '../result/'
+result_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), result_path)
 
 def sample_idx(n, count):
     """
@@ -16,6 +21,21 @@ def generate_mask(shape, p):
     a = np.random.rand(*shape)
     mask = (a > p) * 1
     return mask
+
+
+def save_result(file_name, result, columns_name=['loss_g', 'loss_d', 'loss_test', 'w_distance', 'acc']):
+    temp = pd.DataFrame(data=result, columns=columns_name).reset_index(drop=True)
+    temp.to_csv(os.path.join(result_path, file_name))
+
+
+def read_result(file_name):
+    path = os.path.join(result_path, file_name)
+    temp = pd.read_csv(path)
+    columns = ['loss_g', 'loss_d', 'loss_test', 'w_distance', 'acc']
+    res = []
+    for name in columns:
+        res.append(temp[name].tolist())
+    return res
 
 
 def generate_mask_mix(info_list, batch_size, mask_rate):

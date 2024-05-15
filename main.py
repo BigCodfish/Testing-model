@@ -2,7 +2,7 @@ from datautils.data_sampler import DataSampler
 from model import train
 from datautils import data_transformer as dt
 from model.layers import NetConfig, LayerConfig
-from utils import painter
+from utils import painter, utils
 
 def run_train():
     data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
@@ -25,7 +25,8 @@ def run_train():
 
     loss_g, loss_d, w_distance, loss_test, acc = train.train(data, config_g, config_d, output_info_list, data_sampler,
                                                      batch_size=128, num_epochs=500)
+    combined = list(map(list, zip(loss_g, loss_d, loss_test, w_distance, acc)))
+    utils.save_result('1', combined)
+    # painter.draw_sub([loss_g, loss_d, w_distance, loss_test, acc])
 
-    painter.draw_sub([loss_g, loss_d, w_distance, loss_test, acc])
-
-run_train()
+# run_train()

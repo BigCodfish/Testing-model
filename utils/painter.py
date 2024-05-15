@@ -1,3 +1,6 @@
+import os.path
+
+import pandas as pd
 import torch
 from matplotlib import pyplot as plt
 
@@ -47,5 +50,4 @@ def draw_sub(ys, x=None):
     ax[1][1].plot(x, ys[4])
 
     ax[0][0].legend(['loss_g', 'loss_d'])
-
     plt.show()

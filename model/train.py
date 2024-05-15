@@ -36,13 +36,13 @@ def g_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator, loss
     return loss_g, loss_train, loss_test
 
 
-def d_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator):
+def d_loss(x, new_x, real_x, mask, hint, cond, mask_cond, generator, discriminator):
     input_g = torch.cat(dim=1, tensors=[new_x, mask])
     imputed_x = generator(input_g)
     input_d = torch.cat(dim=1, tensors=[imputed_x, hint])
     # discriminator的损失函数为wasserstein距离
     wasserstein_loss = loss.WDLoss(discriminator)
-    grad_penalty, w_distance = wasserstein_loss(torch.cat(dim=1, tensors=[x, hint]), input_d)
+    grad_penalty, w_distance = wasserstein_loss(torch.cat(dim=1, tensors=[real_x, hint]), input_d)
     return grad_penalty, w_distance
 
 
@@ -53,6 +53,7 @@ def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=Fal
 
     evaluator = Evaluator(data=test_data, mask=test_mask, output_info_list=output_info_list)
 
+    real_data = train_data
     train_data *= train_mask
     test_data *= test_mask
     train_n, test_n = len(train_data), len(test_data)
@@ -77,6 +78,7 @@ def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=Fal
         idx = utils.sample_idx(train_n, batch_size)
         x = train_data[idx, :]
         m = train_mask[idx, :]
+        real_x = train_data[idx, :]
         # 噪声生成方式修改？
         noise = utils.generate_noise(batch_size, dim)
         new_x = x * m + (1 - m) * noise
@@ -95,9 +97,10 @@ def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=Fal
         m = torch.tensor(m, dtype=torch.float32, device='cuda')
         hint = torch.tensor(hint, dtype=torch.float32, device='cuda')
         new_x = torch.tensor(new_x, dtype=torch.float32, device='cuda')
+        real_x = torch.tensor(real_x, dtype=torch.float32, device='cuda')
 
         trainer_d.zero_grad()
-        loss_d, w_distance = d_loss(x=x, new_x=new_x, mask=m, hint=hint, cond=c, mask_cond=m_c,
+        loss_d, w_distance = d_loss(x=x, real_x=real_x, new_x=new_x, mask=m, hint=hint, cond=c, mask_cond=m_c,
                                     generator=generator, discriminator=discriminator)
         loss_d.backward()
         trainer_d.step()
