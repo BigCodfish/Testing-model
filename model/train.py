@@ -16,22 +16,26 @@ alpha = 10
 def g_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator, loss_type, output_info_list, use_cond):
     if use_cond:
         input_g = torch.cat(dim=1, tensors=[new_x, mask, cond])
-        imputed_x = generator(input_g)
-        hat_new_x = new_x * mask + imputed_x * (1 - mask)
-        input_d = torch.cat(dim=1, tensors=[hat_new_x, hint, cond])
+        if loss_type == 'VAE':
+            imputed_x, mu, var = generator(input_g)
+        else:
+            imputed_x = generator(input_g)
+        imputed_x = new_x * mask + imputed_x * (1 - mask)
+        input_d = torch.cat(dim=1, tensors=[imputed_x, hint, cond])
     else:
         input_g = torch.cat(dim=1, tensors=[new_x, mask])
-        imputed_x = generator(input_g)
-        hat_new_x = new_x * mask + imputed_x * (1 - mask)
-        input_d = torch.cat(dim=1, tensors=[hat_new_x, hint])
+        if loss_type == 'VAE':
+            imputed_x, mu, var = generator(input_g)
+        else:
+            imputed_x = generator(input_g)
+        imputed_x = new_x * mask + imputed_x * (1 - mask)
+        input_d = torch.cat(dim=1, tensors=[imputed_x, hint])
 
     score = discriminator(input_d)
 
-    loss_train = torch.mean((mask * new_x - mask * imputed_x) ** 2) / torch.mean(mask)
-    loss_test = torch.mean(((1 - mask) * x - (1 - mask) * imputed_x) ** 2) / torch.mean(1 - mask)
-
     if loss_type == 'GAIN':
         loss_g = -torch.mean((1 - mask) * torch.log(score + 1e-8))
+        loss_train = torch.mean((mask * new_x - mask * imputed_x) ** 2) / torch.mean(mask)
         loss_g = loss_g + alpha * loss_train
     elif loss_type == 'CTGAN':
         loss_fn = CTGANLoss(discriminator=discriminator, generator=generator, output_info_list=output_info_list)
@@ -39,22 +43,27 @@ def g_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator, loss
     elif loss_type == 'Information':
         loss_fn = InformationLoss(generator=generator, discriminator=discriminator)
         loss_g = loss_fn(data=new_x, mask=mask, hint=hint, cond=cond)
+    elif loss_type == 'VAE':
+        BCE = nn.functional.cross_entropy(imputed_x, x, reduction='mean')
+        KLD = torch.mean(0.5 * torch.sum(torch.exp(var) + mu**2 - 1. - var, 1))
+        loss_g = BCE + KLD
     else:
         raise ValueError(f'未知的generator损失函数类型{loss_type}')
 
-    return loss_g, loss_train, loss_test
-
+    return loss_g
 
 def d_loss(x, new_x, mask, hint, cond, mask_cond, loss_type, generator, discriminator, use_cond):
     if use_cond:
         input_g = torch.cat(dim=1, tensors=[new_x, mask, cond])
-        imputed_x = generator(input_g)
-        input_d = torch.cat(dim=1, tensors=[imputed_x, hint, cond])
+        imputed_x, _, _ = generator(input_g)
+        hat_new_x = new_x * mask + imputed_x * (1 - mask)
+        input_d = torch.cat(dim=1, tensors=[hat_new_x, hint, cond])
         input_d_real = torch.cat(dim=1, tensors=[x, mask, cond])
     else:
         input_g = torch.cat(dim=1, tensors=[new_x, mask])
-        imputed_x = generator(input_g)
-        input_d = torch.cat(dim=1, tensors=[imputed_x, hint])
+        imputed_x, _, _ = generator(input_g)
+        hat_new_x = new_x * mask + imputed_x * (1 - mask)
+        input_d = torch.cat(dim=1, tensors=[hat_new_x, hint])
         input_d_real = torch.cat(dim=1, tensors=[x, mask])
 
     # discriminator的损失函数为wasserstein距离
@@ -127,7 +136,7 @@ def train(data, config_g, config_d, output_info_list, data_sampler, use_cond=Fal
         trainer_d.step()
 
         trainer_g.zero_grad()
-        loss_g, MSE_train, MSE_test = g_loss(x=x, new_x=new_x, mask=m, hint=hint, cond=c, mask_cond=m_c,
+        loss_g = g_loss(x=x, new_x=new_x, mask=m, hint=hint, cond=c, mask_cond=m_c,
                                              loss_type=config_g.loss, output_info_list=output_info_list,
                                              generator=generator, discriminator=discriminator, use_cond=use_cond)
         loss_g.backward()

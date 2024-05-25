@@ -14,10 +14,16 @@ def run_train():
     layers = [LayerConfig(output_dim * 2 + cond_dim, output_dim, 'Linear', 'relu'),
               LayerConfig(output_dim, output_dim, 'Linear', 'relu'),
               LayerConfig(output_dim, output_dim, 'Linear', '')]
+    layers_VAE = [LayerConfig(output_dim * 2 + cond_dim, output_dim, '', ''),
+                  LayerConfig(100, output_dim, '', '')]
+
+    # VAE
+    config_g = NetConfig(type='VAE', layers=layers_VAE, optim='Adam', loss='VAE')
+    config_d = NetConfig(type='MixDataNet', layers=layers, optim='Adam', loss='WD')
 
     # 逐层分段激活
-    config_g = NetConfig(type='MixDataNet', layers=layers, optim='Adam', loss='CTGAN')
-    config_d = NetConfig(type='MixDataNet', layers=layers, optim='Adam', loss='WD')
+    # config_g = NetConfig(type='MixDataNet', layers=layers, optim='Adam', loss='CTGAN')
+    # config_d = NetConfig(type='MixDataNet', layers=layers, optim='Adam', loss='WD')
 
     # 不逐层分段激活
     # config_g = NetConfig(type='MLP', layers=layers, optim='Adam', loss='CTGAN')
@@ -30,6 +36,8 @@ def run_train():
     painter.draw_sub([loss_g, loss_d, w_distance, loss_test, acc])
 
 run_train()
+
+
 
 def comparison_1_2():
     res_1 = utils.read_result('1')
