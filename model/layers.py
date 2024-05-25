@@ -64,7 +64,7 @@ class MLP(BaseModule):
 
     def forward(self, data):
         data = self.seq(data)
-        # data = self._activate(data)
+        data = self._activate(data)
         return data
 
     def _activate(self, data):

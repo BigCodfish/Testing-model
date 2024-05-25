@@ -5,32 +5,27 @@ import torch
 from matplotlib import pyplot as plt
 
 
-def draw(y, x=None, xlabel='x', ylabel='y'):
-    if x is None:
-        x = torch.arange(start=1, end=len(y) + 1, dtype=int)
-    plt.plot(x, y)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
+# def draw(y, x=None, xlabel='x', ylabel='y'):
+#     if x is None:
+#         x = torch.arange(start=1, end=len(y) + 1, dtype=int)
+#     plt.plot(x, y)
+#     plt.xlabel(xlabel)
+#     plt.ylabel(ylabel)
+#     plt.show()
 
 
-def draw(ys, x=None, offset=0, xlabel='x', ylabel='y', ytags=None, title="default", sub=None):
+def draw(ys, x=None, offset=0, xlabel='epoch', ylabel='y', ytags=None, title="default"):
     if x is None:
         x = torch.arange(start=1, end=len(ys[0]) + 1, dtype=int)
     for i in range(len(ys)):
-        if sub is None:
-            plt.plot(x[offset:], ys[i][offset:])
-        else:
-            sub.plot(x[offset:], ys[i][offset:])
-    if sub is None:
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
-        if ytags is not None:
-            plt.legend(ytags)
-        plt.title(title)
-        plt.show()
-    else:
-        sub.legend(ytags)
+        plt.plot(x[offset:], ys[i][offset:])
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if ytags is not None:
+        plt.legend(ytags)
+    plt.title(title)
+    plt.show()
+
 
 def draw_sub(ys, x=None):
     n = len(ys)

@@ -43,8 +43,13 @@ class Evaluator():
                      / torch.mean(1 - self.mask))
         return loss_test
 
-    def get_accuracy(self, generator):
-        input_data = torch.concat(dim=1, tensors=[self.data, self.mask])
+    def get_accuracy(self, generator, data_sampler, use_cond=False):
+        if use_cond:
+            cond, _, _, _ = data_sampler.sample_cond(len(self.data))
+            cond = torch.tensor(cond, dtype=torch.float32, device='cuda')
+            input_data = torch.cat(dim=1, tensors=[self.data, self.mask, cond])
+        else:
+            input_data = torch.concat(dim=1, tensors=[self.data, self.mask])
         imputed_data = generator(input_data)
         imputed_data = self.data * self.mask + imputed_data * (1-self.mask)
         acc_count = 0

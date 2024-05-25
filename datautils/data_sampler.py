@@ -46,9 +46,9 @@ class DataSampler:
             else:
                 st += sum([span_info.dim for span_info in column_info])
 
-    def sample_cond(self, batch):
+    def sample_cond(self, batch, data_mask=None):
         """Generate the conditional vector for training.
-
+            condvec每次只选择一个离散列中的一个类别
         Returns:
             cond (batch x #categories):
                 The conditional vector.

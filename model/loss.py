@@ -103,21 +103,22 @@ class CTGANLoss(nn.Module):
 
         return (loss * m).sum() / data.size()[0]
 
-class IDCLoss(nn.Module):
+class InformationLoss(nn.Module):
     def __init__(self, generator, discriminator):
         super().__init__()
         self.generator = generator
         self.discriminator = discriminator
 
-    def forward(self, data, real_data, mask, hint, cond):
+    def forward(self, data, mask, hint, cond):
         input_g = torch.cat(dim=1, tensors=[data, mask, cond])
         imputed = self.generator(input_g)
         imputed = imputed * (1-mask) + data * mask
         input_d_fake = torch.cat(dim=1, tensors=[imputed, hint, cond])
-        input_d_real = torch.cat(dim=1, tensors=[real_data, hint, cond])
+        input_d_real = torch.cat(dim=1, tensors=[data, hint, cond])
         estimate_fake = self.discriminator(input_d_fake)
         estimate_real = self.discriminator(input_d_real)
         l_inform = self._information_loss(estimate_real=estimate_real, estimate_fake=estimate_fake)
+        return l_inform
 
     def _downstream_loss(self):
         return
