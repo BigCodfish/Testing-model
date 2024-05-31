@@ -4,6 +4,16 @@ import torch
 from datautils.data_transformer import SpanInfo
 from utils.utils import generate_mask_mix
 
+def test_model_save(model_save_path, x_num_test, x_cat_test, re_x_num, re_x_cat, mu, var):
+    print('testing model save and reload...')
+    model = torch.load(model_save_path)
+    hat_re_x_num, hat_re_x_cat, hat_mu, hat_var = model(x_num_test, x_cat_test)
+
+    print(f're_x_num:{hat_re_x_num.equal(re_x_num)}')
+    for i in range(len(re_x_cat)):
+        if re_x_cat[i].equal(hat_re_x_cat[i]) is False:
+            print(f'x_cat not equal in:{i}')
+
 
 def _test_data_mask():
     data = np.ones([10, 10])

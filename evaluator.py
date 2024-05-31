@@ -56,7 +56,7 @@ class Evaluator():
         start, end = 0, 0
         for column_info in self.output_info_list:
             if len(column_info) > 1:
-                # 跳过一个连续变量
+                # skip continuous column
                 start += 1
                 end = start
 

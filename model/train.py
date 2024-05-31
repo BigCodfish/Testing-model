@@ -12,7 +12,6 @@ from utils.utils import generate_mask_mix
 
 alpha = 10
 
-
 def g_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator, loss_type, output_info_list, use_cond):
     if use_cond:
         input_g = torch.cat(dim=1, tensors=[new_x, mask, cond])
@@ -47,6 +46,8 @@ def g_loss(x, new_x, mask, hint, cond, mask_cond, generator, discriminator, loss
         BCE = nn.functional.cross_entropy(imputed_x, x, reduction='mean')
         KLD = torch.mean(0.5 * torch.sum(torch.exp(var) + mu**2 - 1. - var, 1))
         loss_g = BCE + KLD
+        loss_g *= 0.1
+        loss_g += torch.mean((1 - mask) * torch.log(score + 1e-8))
     else:
         raise ValueError(f'未知的generator损失函数类型{loss_type}')
 

@@ -1,10 +1,12 @@
 import json
+import torch
 import os
 from collections import namedtuple
 import numpy as np
 import pandas as pd
 from joblib import delayed, Parallel
 from rdt.transformers import ClusterBasedNormalizer, OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler
 from utils import utils
 
 SpanInfo = namedtuple('SpanInfo', ['dim', 'activation_fn'])
@@ -57,7 +59,7 @@ def max_min_norm(data):
     return data
 
 
-def cross_validation(data, mask, fixed=False, test_rate=0.2):
+def cross_validation(data, mask=None, fixed=False, test_rate=0.2):
     """
     分割数据集交叉验证
     :param data:
@@ -74,9 +76,56 @@ def cross_validation(data, mask, fixed=False, test_rate=0.2):
         idx = np.random.permutation(n)
     test_data = data[idx[:test_n], :]
     train_data = data[idx[test_n:], :]
-    test_m = mask[idx[:test_n], :]
-    train_m = mask[idx[test_n:], :]
-    return train_data, test_data, train_m, test_m
+    if mask is None:
+        return train_data, test_data
+    else:
+        test_m = mask[idx[:test_n], :]
+        train_m = mask[idx[test_n:], :]
+        return train_data, test_data, train_m, test_m
+
+def preprocess(data, discrete_columns):
+    '''
+    分离数字列和离散列, 并对离散数据进行one-hot编码
+    :param data:
+    :param discrete_columns:
+    :return:
+    '''
+    dim_num = 0
+    categories = []
+    data_num = []
+    data_cat = []
+    for column_name in data.columns:
+        if column_name in discrete_columns:
+            # 离散数据
+            oe = OrdinalEncoder(dtype='int64')
+            oe.fit(data[[column_name]], column_name)
+            categories.append(len(set(data[column_name])))
+            data_cat.append(oe.transform(data[[column_name]]))
+        else:
+            # 数字数据
+            norm = MinMaxScaler()
+            norm.fit(data[[column_name]], column_name)
+            data_num.append(norm.transform(data[[column_name]]))
+            dim_num += 1
+    data_cat = np.concatenate(data_cat, axis=1)
+    data_num = np.concatenate(data_num, axis=1).astype(float)
+    return data_num, data_cat, dim_num, categories
+
+def split_num_cat(data, decoder):
+    data = data.reshape(-1, 16, 4)
+    x_hat_num, x_hat_cat = decoder(data)
+    syn_cat = []
+    for pred in x_hat_cat:
+        syn_cat.append(pred.argmax(dim=-1))
+
+    syn_num = x_hat_num.detach().cpu().numpy()
+    norm = MinMaxScaler()
+    norm.fit(syn_num)
+
+    syn_num = norm.inverse_transform(syn_num)
+    syn_cat = torch.stack(syn_cat).t().cpu().numpy()
+
+    return syn_num, syn_cat
 
 
 def transform(data, discrete_columns=()):
