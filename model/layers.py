@@ -11,7 +11,7 @@ LayerConfig = namedtuple("LayerConfig",
 NetConfig = namedtuple('Netconfig', ['type', 'layers', 'optim', 'loss'])
 
 
-def build_net(config, output_info_list, device='cuda'):
+def build_net(config, output_info_list=None, device='cuda'):
     if config.type == 'MixDataNet':
         return MixDataNet(config=config, output_info_list=output_info_list).to(device)
     elif config.type == 'MLP':
@@ -68,7 +68,7 @@ class MLP(BaseModule):
 
     def forward(self, data):
         data = self.seq(data)
-        data = self._activate(data)
+        # data = self._activate(data)
         return data
 
     def _activate(self, data):

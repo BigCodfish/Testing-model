@@ -37,6 +37,16 @@ def read_result(file_name):
         res.append(temp[name].tolist())
     return res
 
+def generate_mask_token(dim_x, dim_token, batch_size, rate_0):
+    dim = dim_x // dim_token
+    raw_mask = generate_mask([batch_size, dim], rate_0)
+    mask = np.zeros([batch_size, dim_x])
+    st = 0
+    for i in range(dim):
+        for j in range(dim_token):
+            mask[:, st+j] = raw_mask[:, i]
+        st += dim_token
+    return mask
 
 def generate_mask_mix(info_list, batch_size, mask_rate):
     dims = []

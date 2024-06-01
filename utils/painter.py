@@ -35,8 +35,8 @@ def draw_sub(ys, x=None):
     fig.set_size_inches(12, 8)
     ax[0][0].set_title('loss of g&d')
     ax[0][1].set_title('w_distance')
-    ax[1][0].set_title('loss test')
-    ax[1][1].set_title('acc')
+    ax[1][0].set_title('test mse')
+    ax[1][1].set_title('test acc')
 
     ax[0][0].plot(x, ys[0])
     ax[0][0].plot(x, ys[1])

@@ -16,7 +16,6 @@ import time
 from datautils.data_transformer import preprocess, cross_validation
 from datautils import data_transformer as dt
 from model.vae.vae import Encoder_model, Decoder_model, Model_VAE
-from test.test import test_model_save
 
 
 class TabularDataset(Dataset):
@@ -194,7 +193,7 @@ def main():
                     best_train_loss = train_loss
                     patience = 0
                     torch.save(model, model_save_path)
-                    test_model_save(model_save_path, X_test_num, X_test_cat, Recon_X_num, Recon_X_cat, mu_z, std_z)
+                    # test_model_save(model_save_path, X_test_num, X_test_cat, Recon_X_num, Recon_X_cat, mu_z, std_z)
                 else:
                     patience += 1
                     if patience == 10:

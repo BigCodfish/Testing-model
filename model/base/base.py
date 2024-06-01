@@ -1,17 +1,25 @@
+import os
+
+import torch
 from torch import nn
 
 
-class MLP_VAE(nn.Module):
-    def __init__(self, in_dim, hidden_dim, out_dim, dropout=0.5):
+class BaseModule(nn.Module):
+    def __init__(self, param_file_name):
         super().__init__()
-        self.fc1 = nn.Linear(in_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, out_dim)
-        self.dropout = nn.Dropout(p=dropout)
-        nn.init.xavier_uniform_(self.fc1.weight)
-        nn.init.xavier_uniform_(self.fc2.weight)
+        self.param_file_name = param_file_name
 
-    def forward(self, x):
-        x = nn.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
-        return x
+    # 读取网络参数
+    def load(self, param_path, param_file_name=None):
+        if param_file_name is None:
+            param_file_name = self.param_file_name
+        path = os.path.join(param_path, param_file_name)
+        print('loading', path)
+        self.load_state_dict(torch.load(path))
+
+    # 保存网络参数
+    def save(self, param_path, param_file_name=None):
+        if param_file_name is None:
+            param_file_name = self.param_file_name
+        path = os.path.join(param_path, param_file_name)
+        torch.save(self.state_dict(), path)

@@ -360,8 +360,8 @@ class Encoder_model(nn.Module):
         self.VAE_Encoder = Transformer(num_layers, d_token, n_head, d_token, factor)
 
     def load_weights(self, Pretrained_VAE):
-        self.Tokenizer = Pretrained_VAE.VAE.Tokenizer
-        self.VAE_Encoder = Pretrained_VAE.VAE.encoder_mu
+        self.Tokenizer.load_state_dict(Pretrained_VAE.VAE.Tokenizer.state_dict())
+        self.VAE_Encoder.load_state_dict(Pretrained_VAE.VAE.encoder_mu.state_dict())
 
     def forward(self, x_num, x_cat):
         x = self.Tokenizer(x_num, x_cat)
@@ -377,8 +377,8 @@ class Decoder_model(nn.Module):
         self.Detokenizer = Reconstructor(d_numerical, categories, d_token)
 
     def load_weights(self, Pretrained_VAE):
-        self.VAE_Decoder = Pretrained_VAE.VAE.decoder
-        self.Detokenizer = Pretrained_VAE.Reconstructor
+        self.VAE_Decoder.load_state_dict(Pretrained_VAE.VAE.decoder.state_dict())
+        self.Detokenizer.load_state_dict(Pretrained_VAE.Reconstructor.state_dict())
 
     def forward(self, z):
         h = self.VAE_Decoder(z)
