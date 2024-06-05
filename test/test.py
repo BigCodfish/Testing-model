@@ -1,9 +1,13 @@
 import numpy as np
+import pandas as pd
 import torch
 from torch import nn
 
 from datautils.data_transformer import SpanInfo
-from utils.utils import generate_mask_mix
+from evaluator import Evaluator
+from utils.utils import generate_mask_mix, generate_mask
+from rdt.transformers import ClusterBasedNormalizer
+from datautils import data_transformer as dt
 
 
 def compute_loss(X_num, X_cat, Recon_X_num, Recon_X_cat):
@@ -26,7 +30,9 @@ def compute_loss(X_num, X_cat, Recon_X_num, Recon_X_cat):
 
     return mse_loss, ce_loss, acc
 
-def test_model_save(pre_decoder, model_save_path, encoder_save_path, decoder_save_path, x_num_test, x_cat_test, re_x_num, re_x_cat, mu, var, x, h):
+
+def test_model_save(pre_decoder, model_save_path, encoder_save_path, decoder_save_path, x_num_test, x_cat_test,
+                    re_x_num, re_x_cat, mu, var, x, h):
     print('testing model save and reload...')
     model = torch.load(model_save_path)
     encoder = torch.load(encoder_save_path)
@@ -55,46 +61,42 @@ def test_model_save(pre_decoder, model_save_path, encoder_save_path, decoder_sav
 
 
 def _test_data_mask():
-    data = np.ones([10, 10])
+    data = np.ones([1000, 10])
     info_list = [[SpanInfo(dim=2, activation_fn=''), SpanInfo(dim=1, activation_fn='')],
                  [SpanInfo(dim=3, activation_fn=''), SpanInfo(dim=4, activation_fn='')]]
-    mask = generate_mask_mix(info_list=info_list, batch_size=len(data), mask_rate=0.5)
+    mask = generate_mask(data, None, 0.5, data_info=info_list)
     masked = data * mask
     print(data)
     print(masked)
-    t = data-masked
-    print(np.count_nonzero(t == 0) / 100)
+    t = data - masked
+    print(np.count_nonzero(t == 0) / 10000)
+
 
 def _test_evaluator():
-    data = np.ones([10, 10])
-    info_list = [[SpanInfo(dim=2, activation_fn=''), SpanInfo(dim=1, activation_fn='')],
-                 [SpanInfo(dim=3, activation_fn=''), SpanInfo(dim=4, activation_fn='')]]
-    n = len(data)
-    mask = generate_mask_mix(info_list=info_list, batch_size=len(data), mask_rate=0.5)
-    masked = data * mask
-    missing_count = 0
-    acc_count = 0
-    for i in range(n):
-        start, end = 0, 0
-        for column_info in info_list:
-            if len(column_info) > 1:
-                # 跳过一个连续变量
-                start += 1
-                end = start
+    data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
+    data, data_info, dim_output = dt.transform(data, discrete_column)
+    data = torch.tensor(data, dtype=torch.float32, device='cuda')
+    evaluator = Evaluator(None, None, 1, output_info_list=data_info)
+    for i in range(11):
+        rate_0 = i * 0.1
+        m = generate_mask(data, None, rate_0, data_info=data_info)
+        m = torch.tensor(m, dtype=torch.float32, device='cuda')
+        data_m = data * m
+        acc = evaluator.compute_acc_msn(data, data_m)
+        mse = evaluator.compute_mse_msn(data, data_m)
+        print('acc = {:.5f}, mse = {:.5f}'.format(acc, mse.item()))
 
-            info = column_info[-1]
-            end += info.dim
-            if mask[i, start] == 0:
-                missing_count += 1
 
-            v = data[i, start:end].argmax(axis=1)
-            if data[i, v] == 1:
-                acc_count += 1
-            start = end
-    print(f'离散数据缺失数：{missing_count}'
-          f'离散数据预测准确率：{acc_count / missing_count}')
+def _test_cbn():
+    data = pd.DataFrame(data={'col': np.random.uniform(0, 10, size=200)})
+    transformer = ClusterBasedNormalizer(max_clusters=10, weight_threshold=0.005)
+    transformer.fit(data, 'col')
+    new_data = transformer.transform(data)
+    re_data = transformer.reverse_transform(new_data)
+    print((re_data-data).max())
 
-# _test_data_mask()
+# _test_evaluator()
+_test_data_mask()
 # data = np.array([[1,2,3],
 #                 [3,5,4]])
 # print(data.argmax(axis=1))

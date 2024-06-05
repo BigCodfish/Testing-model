@@ -7,7 +7,6 @@ import pandas as pd
 from joblib import delayed, Parallel
 from rdt.transformers import ClusterBasedNormalizer, OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler
-from utils import utils
 
 SpanInfo = namedtuple('SpanInfo', ['dim', 'activation_fn'])
 ColumnTransformInfo = namedtuple(
@@ -19,6 +18,11 @@ ColumnTransformInfo = namedtuple(
 data_path = '../data/'
 data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), data_path)
 
+def load_ckpt(name, type):
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    ckpt_dir = os.path.join(cur_dir, '../model/vae/ckpt')
+    model_path = os.path.join(ckpt_dir, name, type)
+    return torch.load(model_path)
 
 def load_data(name, path=data_path):
     name = os.path.join(path, name)
@@ -127,6 +131,12 @@ def split_num_cat(data, decoder):
 
     return syn_num, syn_cat
 
+def reverse_transform_num(data, column_name, transformer):
+    modes = data[:, 1:].argmax(axis=1)
+    new_x = pd.DataFrame(data={f'{column_name}.normalized': data[:, 0],
+                               f'{column_name}.component': modes.astype(int)})
+    re_num = transformer.reverse_transform(new_x)
+    return re_num
 
 def transform(data, discrete_columns=()):
     """
@@ -169,10 +179,9 @@ def _continuous_fit(data):
     )
     gm.fit(data, column_name)
     num_components = sum(gm.valid_component_indicator)
-
     return ColumnTransformInfo(
         column_name=column_name, column_type='continuous', transform=gm,
-        output_info=[SpanInfo(1, 'tanh'), SpanInfo(num_components, 'softmax')],
+        output_info=[SpanInfo(1, 'tanh'), SpanInfo(num_components, 'softmax'),column_name, gm],
         output_dim=1 + num_components)
 
 
@@ -242,7 +251,6 @@ def _transform_continuous(column_transform_info, data):
     output[:, 0] = transformed[f'{column_name}.normalized'].to_numpy()
     index = transformed[f'{column_name}.component'].to_numpy().astype(int)
     output[np.arange(index.size), index + 1] = 1.0
-
     return output
 
 

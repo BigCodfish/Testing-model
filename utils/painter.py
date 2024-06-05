@@ -27,22 +27,21 @@ def draw(ys, x=None, offset=0, xlabel='epoch', ylabel='y', ytags=None, title="de
     plt.show()
 
 
-def draw_sub(ys, x=None):
-    n = len(ys)
+def draw_sub(ys, titles, x=None):
+    n = len(ys) // 2
     if x is None:
         x = torch.arange(start=1, end=len(ys[0])+1, dtype=int)
-    fig, ax = plt.subplots(2, 2)
-    fig.set_size_inches(12, 8)
+    fig, ax = plt.subplots(2, n)
+    fig.set_size_inches(6*n, 10)
     ax[0][0].set_title('loss of g&d')
-    ax[0][1].set_title('w_distance')
-    ax[1][0].set_title('test mse')
-    ax[1][1].set_title('test acc')
-
     ax[0][0].plot(x, ys[0])
     ax[0][0].plot(x, ys[1])
-    ax[0][1].plot(x, ys[2])
-    ax[1][0].plot(x, ys[3])
-    ax[1][1].plot(x, ys[4])
-
     ax[0][0].legend(['loss_g', 'loss_d'])
+    i = 0
+    for j in range(2, len(ys)):
+        if j > n:
+            i = 1
+            j -= n
+        ax[i][j-1].plot(x, ys[i * n + j])
+        ax[i][j-1].set_title(titles[i * n + j])
     plt.show()

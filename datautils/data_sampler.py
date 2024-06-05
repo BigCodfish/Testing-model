@@ -44,7 +44,7 @@ class DataSampler:
                 current_id += 1
                 st = ed
             else:
-                st += sum([span_info.dim for span_info in column_info])
+                st += column_info[1].dim + 1
 
     def sample_cond(self, batch, data_mask=None):
         """Generate the conditional vector for training.
