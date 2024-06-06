@@ -13,8 +13,9 @@ from matplotlib import pyplot as plt
 #     plt.ylabel(ylabel)
 #     plt.show()
 
+fig_save_path = 'C:\\Users\\39228\Desktop\\figsave'
 
-def draw(ys, x=None, offset=0, xlabel='epoch', ylabel='y', ytags=None, title="default"):
+def draw(ys, x=None, offset=0, xlabel='epoch', ylabel='y', ytags=None, title="default", save_name=None):
     if x is None:
         x = torch.arange(start=1, end=len(ys[0]) + 1, dtype=int)
     for i in range(len(ys)):
@@ -24,6 +25,9 @@ def draw(ys, x=None, offset=0, xlabel='epoch', ylabel='y', ytags=None, title="de
     if ytags is not None:
         plt.legend(ytags)
     plt.title(title)
+    if save_name is not None:
+        save_path = os.path.join(fig_save_path, save_name)
+        plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
 

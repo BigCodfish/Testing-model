@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from datautils.data_transformer import SpanInfo
-from utils.painter import draw_sub
+from utils.painter import draw_sub, draw
 
 result_path = '../result/'
 result_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), result_path)
@@ -33,6 +33,35 @@ class Logger():
         save_result(name, list(self.records.values()), list(self.records.keys()))
         print(f'result saved: {name}')
 
+def get_last_result(file_names):
+    for name in file_names:
+        result, _ = read_result(name)
+        acc = result[-1]
+        acc = sum(acc[-5:]) / 5.
+        mse = result[-2]
+        mse = sum(mse[-5:]) / 5
+        print(name, 'acc: {:.4f}, mse: {:.4f}'.format(acc, mse))
+
+
+def compare_save(file_names):
+    loss = {}
+    results = {}
+    for name in file_names:
+        result, columns = read_result(name)
+        loss[name] = [result[0], result[1]]
+        for i in range(2, len(columns)):
+            if columns[i] not in results:
+                results[columns[i]] = []
+            results[columns[i]].append(result[i])
+    '-- plot loss --'
+    for k, v in loss.items():
+        draw(v, ylabel='loss', ytags=['loss_g', 'loss_d'], title=k, save_name='loss_'+k)
+    '-- plot other --'
+    for k, v in results.items():
+        draw(v, ylabel=k, title=k, ytags=file_names, save_name=k)
+
+
+
 def sample_idx(n, count):
     """
     随机抽取序号
@@ -60,7 +89,8 @@ def build_logger(keys):
 def read_result(file_name):
     path = os.path.join(result_path, file_name)
     temp = pd.read_csv(path)
-    columns = temp.columns[0]
+    columns = temp.columns
+    columns = columns[1:]
     res = []
     for name in columns:
         res.append(temp[name].tolist())

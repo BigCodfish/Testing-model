@@ -31,7 +31,7 @@ def run_train_mlp_mlp_msn(use_cond):
               LayerConfig(dim_output, dim_output, 'sigmoid'), ]
     generator = MLP(layers)
     discriminator = MLP(layers)
-    logger = trainer.train(train_x, test_x, generator, discriminator, ['CTGAN', 'WD'],
+    logger = trainer.train(train_x, test_x, generator, discriminator, ['GAIN', 'WD'],
                            data_info=data_info, data_sampler=data_sampler,
                            rate_0=0.2, hint_rate=0.9, batch_size=128, num_epochs=4000, device='cuda')
     return logger
@@ -128,10 +128,15 @@ def run_train_mlp_mlp_vae():
                            rate_0=0.2, hint_rate=0.9, batch_size=128, num_epochs=4000, device='cuda')
     return logger
 
-# logger = run_train_mlp_mlp_msn(True)
+# logger = run_train_mlp_mlp_msn(False)
 # logger = run_train_mlpsa_mlpsa_msn(True,True)
 # logger = run_train_vae_mlpsa_msn(True, False)
-logger = run_train_vae_mlp_msn(False)
+# logger = run_train_vae_mlp_msn(False)
 # logger = run_train_mlp_mlp_vae()
-logger.plot_sub()
-logger.save('new_10')
+# logger.plot_sub()
+# logger.save('exp_1')
+utils.compare_save(['exp_4', 'exp_5', 'exp_6'])
+# for i in range(1, 12):
+#     name = 'exp_' + str(i)
+#     utils.get_last_result([name])
+
