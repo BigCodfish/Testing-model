@@ -31,7 +31,7 @@ def run_train_mlp_mlp_msn(use_cond):
               LayerConfig(dim_output, dim_output, 'sigmoid'), ]
     generator = MLP(layers)
     discriminator = MLP(layers)
-    logger = trainer.train(train_x, test_x, generator, discriminator, ['GAIN', 'WD'],
+    logger = trainer.train(train_x, test_x, generator, discriminator, ['CTGAN', 'WD'],
                            data_info=data_info, data_sampler=data_sampler,
                            rate_0=0.2, hint_rate=0.9, batch_size=128, num_epochs=4000, device='cuda')
     return logger
@@ -128,14 +128,35 @@ def run_train_mlp_mlp_vae():
                            rate_0=0.2, hint_rate=0.9, batch_size=128, num_epochs=4000, device='cuda')
     return logger
 
+def train_mean_std(n=5):
+    acc_list, mse_list = [], []
+    for i in range(5):
+        logger = run_train_mlp_mlp_vae()
+        acc = logger.records['test_acc'][-5:]
+        acc = sum(acc) / 5
+        mse = logger.records['test_mse'][-5:]
+        mse = sum(mse) / 5
+        acc_list.append(acc)
+        mse_list.append(mse)
+    mean_acc = sum(acc_list) / len(acc_list)
+    mean_mse = sum(mse_list) / len(mse_list)
+    std_acc = np.array(acc_list)
+    std_acc = np.std(std_acc)
+    std_mse = np.array(mse_list)
+    std_mse = np.std(std_mse)
+    print('mean acc: {:.4f}, mean mse: {:.4f}, std acc: {:.4f}, std mse: {:.4f}'.format(mean_acc, mean_mse, std_acc, std_mse))
+
+
+train_mean_std(5)
+
 # logger = run_train_mlp_mlp_msn(False)
-# logger = run_train_mlpsa_mlpsa_msn(True,True)
+# logger = run_train_mlpsa_mlpsa_msn(True, False)
 # logger = run_train_vae_mlpsa_msn(True, False)
 # logger = run_train_vae_mlp_msn(False)
 # logger = run_train_mlp_mlp_vae()
 # logger.plot_sub()
-# logger.save('exp_1')
-utils.compare_save(['exp_4', 'exp_5', 'exp_6'])
+# logger.save('temp2')
+# utils.compare_save(['exp_5', 'exp_6', 'temp2'])
 # for i in range(1, 12):
 #     name = 'exp_' + str(i)
 #     utils.get_last_result([name])

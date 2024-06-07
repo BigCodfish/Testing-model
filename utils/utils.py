@@ -37,7 +37,7 @@ def get_last_result(file_names):
     for name in file_names:
         result, _ = read_result(name)
         acc = result[-1]
-        acc = sum(acc[-5:]) / 5.
+        acc = sum(acc[-5:]) / 5
         mse = result[-2]
         mse = sum(mse[-5:]) / 5
         print(name, 'acc: {:.4f}, mse: {:.4f}'.format(acc, mse))
