@@ -16,6 +16,12 @@ from utils import painter, utils
 
 
 def run_train_mlp_mlp_msn(use_cond):
+    '''
+    G: MLP, D: MLP, data encode: Mode specific normalization
+    change loss_fn and use_cond to run exp.1/2/3/4
+    :param use_cond:
+    :return:
+    '''
     data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
     data, data_info, dim_output = dt.transform(data, discrete_column)
     train_x, test_x = cross_validation(data, fixed=True, test_rate=0.2)
@@ -25,19 +31,26 @@ def run_train_mlp_mlp_msn(use_cond):
     else:
         dim_in = dim_output * 2
         data_sampler = None
-    print(f'模型输入维数: {dim_in}')
+    print(f'input dim: {dim_in}')
     layers = [LayerConfig(dim_in, dim_output, 'relu'),
               LayerConfig(dim_output, dim_output, 'relu'),
               LayerConfig(dim_output, dim_output, 'sigmoid'), ]
     generator = MLP(layers)
     discriminator = MLP(layers)
-    logger = trainer.train(train_x, test_x, generator, discriminator, ['CTGAN', 'WD'],
+    logger = trainer.train(train_x, test_x, generator, discriminator, ['GAIN', 'WD'],
                            data_info=data_info, data_sampler=data_sampler,
                            rate_0=0.2, hint_rate=0.9, batch_size=128, num_epochs=4000, device='cuda')
     return logger
 
 
 def run_train_mlpsa_mlpsa_msn(use_cond, activate_all):
+    '''
+    G: MLPSA, D: MLPSA, data encode: Mode specific normalization
+    change loss_fn, use_cond, activate_all to run exp.5/6/7/8
+    :param use_cond: sample conditional vector in training
+    :param activate_all: use span activate after every layers
+    :return:
+    '''
     data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
     data, data_info, dim_output = dt.transform(data, discrete_column)
     train_x, test_x = cross_validation(data, fixed=True, test_rate=0.2)
@@ -47,18 +60,24 @@ def run_train_mlpsa_mlpsa_msn(use_cond, activate_all):
     else:
         dim_in = dim_output * 2
         data_sampler = None
-    print(f'模型输入维数: {dim_in}')
+    print(f'input dim: {dim_in}')
     layers = [LayerConfig(dim_in, dim_output, 'relu'),
               LayerConfig(dim_output, dim_output, 'relu'),
               LayerConfig(dim_output, dim_output, ''), ]
     generator = MLP_SA(layers, data_info, activate_all=activate_all)
     discriminator = MLP_SA(layers, data_info, activate_all=activate_all)
-    logger = trainer.train(train_x, test_x, generator, discriminator, ['GAIN', 'WD'],
+    logger = trainer.train(train_x, test_x, generator, discriminator, ['CTGAN', 'WD'],
                            data_info=data_info, data_sampler=data_sampler,
                            rate_0=0.2, hint_rate=0.9, batch_size=128, num_epochs=4000, device='cuda')
     return logger
 
 def run_train_vae_mlp_msn(use_cond):
+    '''
+    G: VAE, D: MLP, data encode: Mode specific normalization
+    change loss_fn and use_cond to run exp.10
+    :param use_cond:
+    :return:
+    '''
     data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
     data, data_info, dim_output = dt.transform(data, discrete_column)
     train_x, test_x = cross_validation(data, fixed=True, test_rate=0.2)
@@ -80,6 +99,12 @@ def run_train_vae_mlp_msn(use_cond):
     return logger
 
 def run_train_vae_mlpsa_msn(use_cond, activate_all):
+    '''
+    G: VAE, D: MLPSA, data encode: Mode specific normalization
+    change loss_fn and use_cond to run exp.10
+    :param use_cond:
+    :return:
+    '''
     data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
     data, data_info, dim_output = dt.transform(data, discrete_column)
     train_x, test_x = cross_validation(data, fixed=True, test_rate=0.2)
@@ -147,10 +172,11 @@ def train_mean_std(n=5):
     print('mean acc: {:.4f}, mean mse: {:.4f}, std acc: {:.4f}, std mse: {:.4f}'.format(mean_acc, mean_mse, std_acc, std_mse))
 
 
-train_mean_std(5)
-
-# logger = run_train_mlp_mlp_msn(False)
-# logger = run_train_mlpsa_mlpsa_msn(True, False)
+# train_mean_std(5)
+'exp_1'
+logger = run_train_mlp_mlp_msn(False)
+'exp_5/6'
+logger = run_train_mlpsa_mlpsa_msn(True, False)
 # logger = run_train_vae_mlpsa_msn(True, False)
 # logger = run_train_vae_mlp_msn(False)
 # logger = run_train_mlp_mlp_vae()
