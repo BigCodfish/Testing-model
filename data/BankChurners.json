@@ -1,0 +1,96 @@
+{
+    "columns": [
+        {
+            "name": "CLIENTNUM",
+            "type": "continuous"
+        },
+        {
+            "name": "Attrition_Flag",
+            "type": "categorical"
+        },
+        {
+            "name": "Customer_Age",
+            "type": "continuous"
+        },
+        {
+            "name": "Gender",
+            "type": "categorical"
+        },
+        {
+            "name": "Dependent_count",
+            "type": "continuous"
+        },
+        {
+            "name": "Education_Level",
+            "type": "categorical"
+        },
+        {
+            "name": "Marital_Status",
+            "type": "categorical"
+        },
+        {
+            "name": "Income_Category",
+            "type": "categorical"
+        },
+        {
+            "name": "Card_Category",
+            "type": "categorical"
+        },
+        {
+            "name": "Months_on_book",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_Relationship_Count",
+            "type": "continuous"
+        },
+        {
+            "name": "Months_Inactive_12_mon",
+            "type": "continuous"
+        },
+        {
+            "name": "Contacts_Count_12_mon",
+            "type": "continuous"
+        },
+        {
+            "name": "Credit_Limit",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_Revolving_Bal",
+            "type": "continuous"
+        },
+        {
+            "name": "Avg_Open_To_Buy",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_Amt_Chng_Q4_Q1",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_Trans_Amt",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_Trans_Ct",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_Ct_Chng_Q4_Q1",
+            "type": "continuous"
+        },
+        {
+            "name": "Avg_Utilization_Ratio",
+            "type": "continuous"
+        },
+        {
+            "name": "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_1",
+            "type": "continuous"
+        },
+        {
+            "name": "Naive_Bayes_Classifier_Attrition_Flag_Card_Category_Contacts_Count_12_mon_Dependent_count_Education_Level_Months_Inactive_12_mon_2",
+            "type": "continuous"
+        }
+    ]
+}

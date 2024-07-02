@@ -1,0 +1,69 @@
+{
+    "columns": [
+        {
+            "name": "Gender",
+            "type": "categorical"
+        },
+        {
+            "name": "Own_car",
+            "type": "categorical"
+        },
+        {
+            "name": "Own_property",
+            "type": "categorical"
+        },
+        {
+            "name": "Unemployed",
+            "type": "categorical"
+        },
+        {
+            "name": "Num_children",
+            "type": "continuous"
+        },
+        {
+            "name": "Num_family",
+            "type": "continuous"
+        },
+        {
+            "name": "Account_length",
+            "type": "continuous"
+        },
+        {
+            "name": "Total_income",
+            "type": "continuous"
+        },
+        {
+            "name": "Age",
+            "type": "continuous"
+        },
+        {
+            "name": "Years_employed",
+            "type": "continuous"
+        },
+        {
+            "name": "Income_type",
+            "type": "categorical"
+        },
+        {
+            "name": "Education_type",
+            "type": "categorical"
+        },
+        {
+            "name": "Family_status",
+            "type": "categorical"
+        },
+        {
+            "name": "Housing_type",
+            "type": "categorical"
+        },
+        {
+            "name": "Occupation_type",
+            "type": "categorical"
+        },
+        {
+            "name": "Target",
+            "type": "categorical"
+        }
+        
+    ]
+}

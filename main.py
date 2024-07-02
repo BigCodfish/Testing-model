@@ -15,14 +15,14 @@ from trainer import trainer
 from utils import painter, utils
 
 
-def run_train_mlp_mlp_msn(use_cond):
+def run_train_mlp_mlp_msn(use_cond, dataset):
     '''
     G: MLP, D: MLP, data encode: Mode specific normalization
     change loss_fn and use_cond to run exp.1/2/3/4
     :param use_cond:
     :return:
     '''
-    data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
+    data, discrete_column = dt.read_csv(dataset+'.csv', dataset+'.json')
     data, data_info, dim_output = dt.transform(data, discrete_column)
     train_x, test_x = cross_validation(data, fixed=True, test_rate=0.2)
     if use_cond:
@@ -43,7 +43,7 @@ def run_train_mlp_mlp_msn(use_cond):
     return logger
 
 
-def run_train_mlpsa_mlpsa_msn(use_cond, activate_all):
+def run_train_mlpsa_mlpsa_msn(use_cond, activate_all, dataset):
     '''
     G: MLPSA, D: MLPSA, data encode: Mode specific normalization
     change loss_fn, use_cond, activate_all to run exp.5/6/7/8
@@ -51,7 +51,7 @@ def run_train_mlpsa_mlpsa_msn(use_cond, activate_all):
     :param activate_all: use span activate after every layers
     :return:
     '''
-    data, discrete_column = dt.read_csv('adult.csv', 'adult.json')
+    data, discrete_column = dt.read_csv(dataset+'.csv', dataset+'.json')
     data, data_info, dim_output = dt.transform(data, discrete_column)
     train_x, test_x = cross_validation(data, fixed=True, test_rate=0.2)
     if use_cond:
@@ -156,7 +156,7 @@ def run_train_mlp_mlp_vae():
 def train_mean_std(n=5):
     acc_list, mse_list = [], []
     for i in range(5):
-        logger = run_train_mlp_mlp_vae()
+        logger = logger = logger = run_train_mlpsa_mlpsa_msn(True, False, 'German_Credit')
         acc = logger.records['test_acc'][-5:]
         acc = sum(acc) / 5
         mse = logger.records['test_mse'][-5:]
@@ -172,16 +172,18 @@ def train_mean_std(n=5):
     print('mean acc: {:.4f}, mean mse: {:.4f}, std acc: {:.4f}, std mse: {:.4f}'.format(mean_acc, mean_mse, std_acc, std_mse))
 
 
-# train_mean_std(5)
+train_mean_std(5)
 'exp_1'
-logger = run_train_mlp_mlp_msn(False)
+# logger = run_train_mlp_mlp_msn(False, 'German_Credit')
 'exp_5/6'
-logger = run_train_mlpsa_mlpsa_msn(True, False)
+# logger = run_train_mlpsa_mlpsa_msn(True, True, 'German_Credit')
+
 # logger = run_train_vae_mlpsa_msn(True, False)
 # logger = run_train_vae_mlp_msn(False)
 # logger = run_train_mlp_mlp_vae()
+
 # logger.plot_sub()
-# logger.save('temp2')
+# logger.save('German_Credit/exp_6')
 # utils.compare_save(['exp_5', 'exp_6', 'temp2'])
 # for i in range(1, 12):
 #     name = 'exp_' + str(i)

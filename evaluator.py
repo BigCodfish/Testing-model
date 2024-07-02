@@ -89,9 +89,12 @@ class Evaluator():
             acc += np.count_nonzero(temp == 1)
             total += x.shape[0]
             start = end
-        acc /= total
-        acc = (acc - (1 - self.rate_0)) / self.rate_0
-        return acc
+        if total == 0:
+            return 1
+        else:
+            acc /= total
+            acc = (acc - (1 - self.rate_0)) / self.rate_0
+            return acc
 
     def eval_vae(self, generator):
 

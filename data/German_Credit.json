@@ -1,0 +1,85 @@
+{
+    "columns": [
+        {
+            "name": "Creditability",
+            "type": "categorical"
+        },
+        {
+            "name": "Account_Balance",
+            "type": "ordinal"
+        },
+        {
+            "name": "Duration_of_Credit_monthly",
+            "type": "continuous"
+        },
+        {
+            "name": "Payment_Status_of_Previous_Credit",
+            "type": "categorical"
+        },
+        {
+            "name": "Purpose",
+            "type": "categorical"
+        },
+        {
+            "name": "Credit_Amount",
+            "type": "continuous"
+        },
+        {
+            "name": "Value_Savings_Stocks",
+            "type": "categorical"
+        },
+        {
+            "name": "Length_of_current_employment",
+            "type": "ordinal"
+        },
+        {
+            "name": "Instalment_per_cent",
+            "type": "ordinal"
+        },
+        {
+            "name": "Sex_Marital_Status",
+            "type": "categorical"
+        },
+        {
+            "name": "Guarantors",
+            "type": "categorical"
+        },
+        {
+            "name": "Duration_in_Current_address",
+            "type": "categorical"
+        },
+        {
+            "name": "Most_valuable_available_asset",
+            "type": "categorical"
+        },
+        {
+            "name": "Age_years",
+            "type": "continuous"
+        },
+        {
+            "name": "Concurrent_Credits",
+            "type": "categorical"
+        },
+        {
+            "name": "Type_of_apartment",
+            "type": "categorical"
+        },
+        {
+            "name": "No_of_Credits_at_this_Bank",
+            "type": "ordinal"
+        },
+        {
+            "name": "Occupation",
+            "type": "categorical"
+        },
+        {
+            "name": "No_of_dependents",
+            "type": "categorical"
+        },
+        {
+            "name": "Foreign_Worker",
+            "type": "categorical"
+        }
+        
+    ]
+}
